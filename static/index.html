@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>getdesign.md // Vercel Dark Design System Generator</title>
+    <meta name="description" content="Reverse-engineer web page visual structures into design.md schemas.">
+    <!-- Google Fonts: Geist and Geist Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="vercel-theme">
+    <!-- Ambient vertical mesh glow -->
+    <div class="vercel-glow-backdrop"></div>
+
+    <div class="app-container">
+        <!-- Top Navbar -->
+        <header class="top-nav" id="main-header">
+            <div class="nav-brand">
+                <svg class="vercel-logo" viewBox="0 0 75 65" fill="#ffffff" style="height: 18px; width: auto; margin-right: 10px;">
+                    <path d="M37.5 0L75 65H0L37.5 0Z"></path>
+                </svg>
+                <span class="vercel-title" id="logo-text">GETDESIGN.MD.</span>
+            </div>
+            
+            <div class="nav-actions">
+                <div class="api-status-indicator" id="api-status">
+                    <span class="status-dot green"></span>
+                    <span class="status-text" id="api-status-text">CHECKING ENGINE STATUS...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Sidebar for Settings & History -->
+            <aside class="sidebar-panel">
+                <!-- URL Generator Panel -->
+                <div class="panel-section">
+                    <div class="section-title">
+                        <i data-lucide="terminal"></i>
+                        <h2>REVERSE ENGINEER</h2>
+                    </div>
+                    
+                    <form id="generator-form" class="generator-form">
+                        <div class="form-group">
+                            <label for="target-url">TARGET WEBSITE URL</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="globe" class="input-icon"></i>
+                                <input type="url" id="target-url" placeholder="https://example.com" required value="https://www.mongodb.com/">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="model-select">LLM MODEL</label>
+                                <select id="model-select">
+                                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                    <option value="gemini-3.1-flash-lite" selected>Gemini 3.1 Flash Lite</option>
+                                </select>
+                            </div>
+                            <div class="form-group half">
+                                <label for="temperature-slider">TEMP: <span id="temp-val">0.2</span></label>
+                                <input type="range" id="temperature-slider" min="0" max="1" step="0.1" value="0.2">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="generate-btn">
+                            <i data-lucide="zap"></i>
+                            <span>GENERATE SCHEMA</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Presets Panel -->
+                <div class="panel-section">
+                    <div class="section-title">
+                        <i data-lucide="layers"></i>
+                        <h2>PRESETS / SAMPLES</h2>
+                    </div>
+                    <div class="presets-grid">
+                        <button class="preset-btn" data-url="https://www.mongodb.com/">MongoDB</button>
+                        <button class="preset-btn" data-url="https://supabase.com/">Supabase</button>
+                        <button class="preset-btn" data-url="https://vercel.com/">Vercel</button>
+                        <button class="preset-btn" data-url="https://linear.app/">Linear</button>
+                        <button class="preset-btn" data-url="https://stripe.com/">Stripe</button>
+                    </div>
+                </div>
+
+                <!-- History Panel -->
+                <div class="panel-section">
+                    <div class="section-title">
+                        <i data-lucide="history"></i>
+                        <h2>GENERATION HISTORY</h2>
+                    </div>
+                    <div class="history-list" id="history-container">
+                        <div class="history-empty">No previous designs saved locally</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Display Board -->
+            <section class="display-board">
+                <!-- Status/Terminal Console -->
+                <div class="console-panel collapsed" id="terminal-console">
+                    <div class="console-header">
+                        <div class="console-title">
+                            <span class="console-title-dot" id="console-pulse"></span>
+                            <span>TRACE LOG</span>
+                            <span style="opacity:0.4; font-weight:400; letter-spacing:0;">— Antigravity Design Engine</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span id="console-line-count" style="font-family:var(--font-mono); font-size:10px; color:rgba(255,255,255,0.2); letter-spacing:0.5px;">0 lines</span>
+                            <button class="btn btn-tertiary" id="clear-console-btn">CLEAR</button>
+                        </div>
+                    </div>
+                    <div class="console-output" id="console-output">
+                        <div class="console-line system"><span class="console-line-prefix">INIT</span>Antigravity Design Engine initialized. Ready to process...</div>
+                    </div>
+                </div>
+
+                <!-- Tabbed Workspace -->
+                <div class="workspace-tabs-container">
+                    <div class="workspace-tabs">
+                        <button class="tab-link active" data-tab="preview-tab" id="tab-visual">
+                            <i data-lucide="eye"></i> SPECIFICATION PREVIEW
+                        </button>
+                        <button class="tab-link" data-tab="sandbox-tab" id="tab-sandbox">
+                            <i data-lucide="play"></i> COMPONENT SANDBOX
+                        </button>
+                        <button class="tab-link" data-tab="code-tab" id="tab-raw">
+                            <i data-lucide="code"></i> RAW DESIGN.MD
+                        </button>
+                    </div>
+
+                    <div class="workspace-actions">
+                        <button class="btn btn-secondary btn-sm" id="btn-copy-md" title="Copy markdown to clipboard">
+                            <i data-lucide="copy"></i> COPY
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="btn-download-md" title="Download design.md">
+                            <i data-lucide="download"></i> DOWNLOAD
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="btn-export-css" title="Export CSS custom properties">
+                            <i data-lucide="file-code"></i> EXPORT CSS
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="tab-contents">
+                    <!-- Tab 1: Spec Preview -->
+                    <div class="tab-pane active" id="preview-tab">
+                        <div class="dashboard-placeholder" id="dashboard-empty-state">
+                            <i data-lucide="sparkles" class="hero-icon"></i>
+                            <h3>NO SCHEMA LOADED</h3>
+                            <p>Enter a target URL and click Generate, or click one of the presets to load a pre-analyzed schema.</p>
+                        </div>
+                        
+                        <div class="token-dashboard hidden" id="token-dashboard">
+                            <!-- Metabar -->
+                            <div class="token-header-card">
+                                <h2 class="token-project-name" id="token-project-name">mongodb-design-analysis</h2>
+                                <p class="token-project-desc" id="token-project-desc">MongoDB carries a strong dual-mode visual identity...</p>
+                                <div class="token-meta-row">
+                                    <div class="meta-item"><span class="label">VERSION:</span> <span class="val" id="token-meta-version">alpha</span></div>
+                                    <div class="meta-item"><span class="label">ENGINE:</span> <span class="val" id="token-meta-engine">Gemini LLM</span></div>
+                                </div>
+                            </div>
+
+                            <div class="dashboard-row">
+                                <!-- Colors Panel -->
+                                <div class="token-section card col-6">
+                                    <h3 class="section-heading"><i data-lucide="palette"></i> COLOR PALETTE</h3>
+                                    <div class="color-grid" id="color-token-grid">
+                                        <!-- Dynamic Colors -->
+                                    </div>
+                                </div>
+
+                                <!-- Typography Panel -->
+                                <div class="token-section card col-6">
+                                    <h3 class="section-heading"><i data-lucide="type"></i> TYPOGRAPHY SCALE</h3>
+                                    <div class="typography-table-wrapper">
+                                        <table class="typography-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>TOKEN</th>
+                                                    <th>FONT</th>
+                                                    <th>SIZE</th>
+                                                    <th>WEIGHT</th>
+                                                    <th>LINE H.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="typography-token-body">
+                                                <!-- Dynamic Typography -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dashboard-row">
+                                <!-- Border Radius -->
+                                <div class="token-section card col-4">
+                                    <h3 class="section-heading"><i data-lucide="corner-down-right"></i> BORDER RADIUS</h3>
+                                    <div class="token-list" id="radius-token-list">
+                                        <!-- Dynamic Radii -->
+                                    </div>
+                                </div>
+
+                                <!-- Spacing -->
+                                <div class="token-section card col-4">
+                                    <h3 class="section-heading"><i data-lucide="move"></i> SPACING SYSTEM</h3>
+                                    <div class="token-list" id="spacing-token-list">
+                                        <!-- Dynamic Spacings -->
+                                    </div>
+                                </div>
+
+                                <!-- Metadata / Gaps -->
+                                <div class="token-section card col-4">
+                                    <h3 class="section-heading"><i data-lucide="alert-circle"></i> SYSTEM OVERVIEW</h3>
+                                    <div class="overview-details" id="system-overview-text">
+                                        <!-- Dynamic overview / gaps -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Sandbox Playground -->
+                    <div class="tab-pane" id="sandbox-tab">
+                        <div class="sandbox-container">
+                            <div class="sandbox-sidebar">
+                                <h3>PLAYGROUND PANEL</h3>
+                                <p class="caption">Test the generated component architecture interactively.</p>
+                                
+                                <div class="form-group" style="margin-top: 15px;">
+                                    <label for="sandbox-label-input">BUTTON & CHIP LABELS</label>
+                                    <input type="text" id="sandbox-label-input" value="Click Action" class="input">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="sandbox-text-input">CARD BODY TEXT</label>
+                                    <textarea id="sandbox-body-textarea" class="input" style="height: 100px; resize: none;">Explore our cloud platform with native APIs and standard database clustering services built for scaling modern applications.</textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>THEME OVERRIDE</label>
+                                    <div class="theme-switcher">
+                                        <button class="btn btn-secondary active" id="theme-btn-dark">DARK CANVAS</button>
+                                        <button class="btn btn-secondary" id="theme-btn-light">LIGHT CANVAS</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>TACTILE SIMULATION</label>
+                                    <div class="checkbox-wrapper">
+                                        <input type="checkbox" id="sim-active-states">
+                                        <label for="sim-active-states">Simulate Pressed States</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="sandbox-canvas" id="sandbox-render-area">
+                                <div class="sandbox-canvas-empty" id="sandbox-empty">
+                                    <i data-lucide="play-circle" class="hero-icon"></i>
+                                    <h3>SANDBOX DISCONNECTED</h3>
+                                    <p>Load a design schema to view interactive component mappings.</p>
+                                </div>
+                                <div class="sandbox-canvas-content hidden" id="sandbox-content">
+                                    <div class="sandbox-category">
+                                        <h4>BUTTONS</h4>
+                                        <div class="sandbox-row" id="sandbox-buttons-container">
+                                            <!-- Dynamic buttons rendered from parsed tokens -->
+                                        </div>
+                                    </div>
+
+                                    <div class="sandbox-category">
+                                        <h4>BADGES & CHIPS</h4>
+                                        <div class="sandbox-row" id="sandbox-chips-container">
+                                            <!-- Dynamic chips -->
+                                        </div>
+                                    </div>
+
+                                    <div class="sandbox-category">
+                                        <h4>INPUT FIELDS</h4>
+                                        <div class="sandbox-row flex-col" id="sandbox-inputs-container">
+                                            <!-- Dynamic inputs -->
+                                        </div>
+                                    </div>
+
+                                    <div class="sandbox-category">
+                                        <h4>CARDS & PANELS</h4>
+                                        <div class="sandbox-grid" id="sandbox-cards-container">
+                                            <!-- Dynamic cards -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Raw Markdown Code -->
+                    <div class="tab-pane" id="code-tab">
+                        <div class="code-editor-container">
+                            <div class="editor-gutter" id="editor-gutter">
+                                <div>1</div>
+                            </div>
+                            <pre class="editor-code-area"><code id="code-output" class="language-markdown">---
+version: alpha
+name: ...
+---</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
